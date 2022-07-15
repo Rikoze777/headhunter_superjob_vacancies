@@ -1,6 +1,6 @@
 import requests
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import count
 import os
 from terminaltables import AsciiTable
@@ -9,12 +9,8 @@ from terminaltables import AsciiTable
 def count_date_from_to():
     date_now = datetime.now()
     date_to = date_now.strftime("%Y-%m-%d")
-    if date_now.month != 1:
-        month, year = (date_now.month-1, date_now.year)
-    else:
-        month, year = (12, date_now.year-1)
-    date_month = date_now.replace(day=1, month=month, year=year)
-    date_from = date_month.strftime("%Y-%m-%d")
+    date_moth_ago = date_now - timedelta(days=30)
+    date_from = date_moth_ago.strftime("%Y-%m-%d")
     return date_from, date_to
 
 
