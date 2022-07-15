@@ -21,7 +21,7 @@ def get_hh_page(date_from, date_to, page, vacancy):
         "date_from": date_from,
         "date_to": date_to,
         "page": page,
-        "per_page": 20,
+        "per_page": 100,
         "describe_arguments": True,
     }
     response = requests.get(hh_url, params=params)
@@ -58,68 +58,68 @@ def predict_salary(salary_from, salary_to):
         return salary_to * 0.8
 
 
-def predict_vacancy_hh(date_from, date_to):
-    vacancies = ["Python", "JavaScript", "Ruby", "Java",
-                 "PHP", "C++", "Go", "Swift"]
-    predicted_vacancy = dict()
+def collect_vacancy_stats_hh(date_from, date_to):
+    langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java",
+                             "PHP", "C++", "Go", "Swift"]
+    vacancy_statistics = dict()
     vacancies_limit = 2000
     per_page = 20
     stop_page = vacancies_limit/per_page - 1
-    for vacancy in vacancies:
-        salary = []
-        vacancies_data = {"vacancies_found": "", "vacancies_processed": "",
-                          "average_salary": ""}
+    for language in langauage_for_vacancy:
+        salaries = []
+        found_statistics = {"vacancies_found": "", "vacancies_processed": "",
+                            "average_salary": ""}
         for page in count():
             hh_vacancies_response = get_hh_page(
-                date_from, date_to, page, vacancy)
+                date_from, date_to, page, language)
             for item in hh_vacancies_response['items']:
                 if item['salary'] and item['salary']['currency'] == 'RUR':
-                    salary.append(predict_salary(item['salary']['from'],
-                                                 item['salary']['to']))
+                    salaries.append(predict_salary(item['salary']['from'],
+                                                   item['salary']['to']))
             if page >= stop_page:
                 break
-        vacancies_data["average_salary"] = int(
-            sum(salary)/len(salary))
-        vacancies_data["vacancies_processed"] = len(salary)
-        vacancies_data["vacancies_found"] = hh_vacancies_response["found"]
-        predicted_vacancy[vacancy] = vacancies_data
-    return predicted_vacancy
+        found_statistics["average_salary"] = int(
+            sum(salaries)/len(salaries))
+        found_statistics["vacancies_processed"] = len(salaries)
+        found_statistics["vacancies_found"] = hh_vacancies_response["found"]
+        vacancy_statistics[language] = found_statistics
+    return vacancy_statistics
 
 
-def predict_vacancy_sj(date_from, date_to, api_id):
-    vacancies = ["Python", "JavaScript", "Ruby", "Java",
-                 "PHP", "C++", "Go", "Swift"]
-    predicted_vacancy = dict()
+def collect_vacancy_stats_sj(date_from, date_to, api_id):
+    langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java",
+                             "PHP", "C++", "Go", "Swift"]
+    vacancy_statistics = dict()
     vacancies_per_page = 5
-    for vacancy in vacancies:
-        salary = []
-        vacancies_data = {"vacancies_found": "",
-                          "vacancies_processed": "",
-                          "average_salary": "",
-                          }
+    for language in langauage_for_vacancy:
+        salaries = []
+        found_statistics = {"vacancies_found": "",
+                            "vacancies_processed": "",
+                            "average_salary": "",
+                            }
         for page in count():
             sj_vacancies_response = get_sj_page(
-                date_from, date_to, vacancy, api_id, page)
+                date_from, date_to, language, api_id, page)
             for object in sj_vacancies_response['objects']:
                 object_sum = object['payment_from'] + object['payment_to']
                 if object_sum > 0 and object['currency'] == 'rub':
-                    salary.append(int(predict_salary(object['payment_from'],
-                                                     object['payment_to'])))
+                    salaries.append(int(predict_salary(object['payment_from'],
+                                                       object['payment_to'])))
             if page >= sj_vacancies_response['total']//vacancies_per_page:
                 break
-        vacancies_data["average_salary"] = int(
-            sum(salary)/len(salary))
-        vacancies_data["vacancies_processed"] = len(salary)
-        vacancies_data["vacancies_found"] = sj_vacancies_response['total']
-        predicted_vacancy[vacancy] = vacancies_data
-    return predicted_vacancy
+        found_statistics["average_salary"] = int(
+            sum(salaries)/len(salaries))
+        found_statistics["vacancies_processed"] = len(salaries)
+        found_statistics["vacancies_found"] = sj_vacancies_response['total']
+        vacancy_statistics[language] = found_statistics
+    return vacancy_statistics
 
 
-def process_statistics(predict_vacancy, title):
+def process_statistics(collected_stats, title):
     header = ['Язык программирования', 'Вакансий найдено',
               'Вакансий обработано', 'Средняя зарплата']
     vacancies_list = []
-    for vacancy in predict_vacancy.items():
+    for vacancy in collected_stats.items():
         vacancies_list.append(vacancy[0])
         vacancies_list.append(vacancy[1]['vacancies_found'])
         vacancies_list.append(vacancy[1]['vacancies_processed'])
@@ -137,12 +137,13 @@ def main():
     load_dotenv()
     sj_api_app_id = os.environ.get("SJ_API_ID")
     date_from, date_to = count_date_from_to()
-    predicted_hh = predict_vacancy_hh(date_from, date_to)
-    predicted_sj = predict_vacancy_sj(date_from, date_to, sj_api_app_id)
+    collected_hh_stats = collect_vacancy_stats_hh(date_from, date_to)
+    collected_sj_stats = collect_vacancy_stats_sj(date_from, date_to,
+                                                  sj_api_app_id)
     title_hh = 'Head Hunter Moscow'
     title_sj = 'Super job Moscow'
-    print(process_statistics(predicted_hh, title_hh))
-    print(process_statistics(predicted_sj, title_sj))
+    print(process_statistics(collected_hh_stats, title_hh))
+    print(process_statistics(collected_sj_stats, title_sj))
 
 
 if __name__ == '__main__':
