@@ -67,8 +67,10 @@ def collect_vacancy_stats_hh(date_from, date_to):
     stop_page = vacancies_limit/per_page - 1
     for language in langauage_for_vacancy:
         salaries = []
-        found_statistics = {"vacancies_found": "", "vacancies_processed": "",
-                            "average_salary": ""}
+        found_statistics = {"average_salary": "",
+                            "vacancies_processed": "",
+                            "vacancies_found": "",
+                            }
         for page in count():
             hh_vacancies_response = get_hh_page(
                 date_from, date_to, page, language)
@@ -78,8 +80,11 @@ def collect_vacancy_stats_hh(date_from, date_to):
                                                    item['salary']['to']))
             if page >= stop_page:
                 break
-        found_statistics["average_salary"] = int(
-            sum(salaries)/len(salaries))
+        try:
+            found_statistics["average_salary"] = int(
+                sum(salaries)/len(salaries))
+        except ZeroDivisionError:
+            len(salaries) == 0
         found_statistics["vacancies_processed"] = len(salaries)
         found_statistics["vacancies_found"] = hh_vacancies_response["found"]
         vacancy_statistics[language] = found_statistics
@@ -93,9 +98,9 @@ def collect_vacancy_stats_sj(date_from, date_to, api_id):
     vacancies_per_page = 5
     for language in langauage_for_vacancy:
         salaries = []
-        found_statistics = {"vacancies_found": "",
+        found_statistics = {"average_salary": "",
                             "vacancies_processed": "",
-                            "average_salary": "",
+                            "vacancies_found": "",
                             }
         for page in count():
             sj_vacancies_response = get_sj_page(
@@ -107,8 +112,11 @@ def collect_vacancy_stats_sj(date_from, date_to, api_id):
                                                        object['payment_to'])))
             if page >= sj_vacancies_response['total']//vacancies_per_page:
                 break
-        found_statistics["average_salary"] = int(
-            sum(salaries)/len(salaries))
+        try:
+            found_statistics["average_salary"] = int(
+                sum(salaries)/len(salaries))
+        except ZeroDivisionError:
+            len(salaries) == 0
         found_statistics["vacancies_processed"] = len(salaries)
         found_statistics["vacancies_found"] = sj_vacancies_response['total']
         vacancy_statistics[language] = found_statistics
@@ -118,15 +126,12 @@ def collect_vacancy_stats_sj(date_from, date_to, api_id):
 def process_statistics(collected_stats, title):
     header = ['Язык программирования', 'Вакансий найдено',
               'Вакансий обработано', 'Средняя зарплата']
-    vacancies_list = []
-    for vacancy in collected_stats.items():
-        vacancies_list.append(vacancy[0])
-        vacancies_list.append(vacancy[1]['vacancies_found'])
-        vacancies_list.append(vacancy[1]['vacancies_processed'])
-        vacancies_list.append(vacancy[1]['average_salary'])
-    chunk_size = 4
-    chunked_list = [vacancies_list[item:item+chunk_size]
-                    for item in range(0, len(vacancies_list), chunk_size)]
+    chunked_list = list()
+    for lang, stats in collected_stats.items():
+        statistics = list(stats.values())
+        statistics.append(lang)
+        statistics = statistics[::-1]
+        chunked_list.append(statistics)
     chunked_list.append(header)
     chunked_list = chunked_list[::-1]
     hh_table_instance = AsciiTable(chunked_list, title)
