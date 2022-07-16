@@ -8,9 +8,9 @@
 ```bash
 SJ_API_ID="Ваш ключ"
 ```
-4. Для того, чтобы задать необходимые профессии, необходимо в функциях `predict_vacancy_hh` и `predict_vacancy_sj` изменить содержимое списка `vacancies` на необходимые профессии, пример:
+4. Для того, чтобы задать необходимые профессии, необходимо в функциях `collect_vacancy_stats_hh` и `collect_vacancy_stats_sj` изменить содержимое списка `langauage_for_vacancy` на необходимые профессии, пример:
 ```python
-vacancies = ["Python", "JavaScript", "Ruby", "Java", "PHP", "C++", "Go", "Swift"]
+langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java", "PHP", "C++", "Go", "Swift"]
 ```
 Python3 должен быть уже установлен. 
 Затем используйте `pip` (или `pip3`, есть конфликт с Python2) для установки зависимостей:
