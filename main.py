@@ -122,15 +122,15 @@ def collect_vacancy_stats_sj(date_from, date_to, api_id, languages):
 def process_statistics(collected_stats, title):
     headers = ['Язык программирования', 'Вакансий найдено',
                'Вакансий обработано', 'Средняя зарплата']
-    chunked_list = list()
+    chunked_statisctics = list()
     for lang, stats in collected_stats.items():
         statistics = list(stats.values())
         statistics.append(lang)
         statistics = statistics[::-1]
-        chunked_list.append(statistics)
-    chunked_list.append(headers)
-    chunked_list = chunked_list[::-1]
-    hh_table_instance = AsciiTable(chunked_list, title)
+        chunked_statisctics.append(statistics)
+    chunked_statisctics.append(headers)
+    chunked_statisctics = chunked_statisctics[::-1]
+    hh_table_instance = AsciiTable(chunked_statisctics, title)
     return hh_table_instance.table
 
 
