@@ -130,8 +130,8 @@ def process_statistics(collected_stats, title):
         chunked_statisctics.append(statistics)
     chunked_statisctics.append(headers)
     chunked_statisctics = chunked_statisctics[::-1]
-    hh_table_instance = AsciiTable(chunked_statisctics, title)
-    return hh_table_instance.table
+    table_instance = AsciiTable(chunked_statisctics, title)
+    return table_instance.table
 
 
 def main():
