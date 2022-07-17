@@ -8,7 +8,7 @@
 ```bash
 SJ_API_ID="Ваш ключ"
 ```
-4. Для того, чтобы задать необходимые профессии, необходимо в функциях `collect_vacancy_stats_hh` и `collect_vacancy_stats_sj` изменить содержимое списка `langauage_for_vacancy` на необходимые профессии, пример:
+4. Для того, чтобы задать необходимые профессии, необходимо изменить содержимое списка `langauages_for_vacancies` на необходимые профессии, пример:
 ```python
 langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java", "PHP", "C++", "Go", "Swift"]
 ```
