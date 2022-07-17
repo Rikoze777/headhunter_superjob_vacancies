@@ -58,14 +58,12 @@ def predict_salary(salary_from, salary_to):
         return salary_to * 0.8
 
 
-def collect_vacancy_stats_hh(date_from, date_to):
-    langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java",
-                             "PHP", "C++", "Go", "Swift"]
+def collect_vacancy_stats_hh(date_from, date_to, languages):
     vacancy_statistics = dict()
     vacancies_limit = 2000
     per_page = 20
     stop_page = vacancies_limit/per_page - 1
-    for language in langauage_for_vacancy:
+    for language in languages:
         salaries = []
         found_statistics = {"average_salary": "",
                             "vacancies_processed": "",
@@ -91,12 +89,10 @@ def collect_vacancy_stats_hh(date_from, date_to):
     return vacancy_statistics
 
 
-def collect_vacancy_stats_sj(date_from, date_to, api_id):
-    langauage_for_vacancy = ["Python", "JavaScript", "Ruby", "Java",
-                             "PHP", "C++", "Go", "Swift"]
+def collect_vacancy_stats_sj(date_from, date_to, api_id, languages):
     vacancy_statistics = dict()
     vacancies_per_page = 5
-    for language in langauage_for_vacancy:
+    for language in languages:
         salaries = []
         found_statistics = {"average_salary": "",
                             "vacancies_processed": "",
@@ -124,15 +120,15 @@ def collect_vacancy_stats_sj(date_from, date_to, api_id):
 
 
 def process_statistics(collected_stats, title):
-    header = ['Язык программирования', 'Вакансий найдено',
-              'Вакансий обработано', 'Средняя зарплата']
+    headers = ['Язык программирования', 'Вакансий найдено',
+               'Вакансий обработано', 'Средняя зарплата']
     chunked_list = list()
     for lang, stats in collected_stats.items():
         statistics = list(stats.values())
         statistics.append(lang)
         statistics = statistics[::-1]
         chunked_list.append(statistics)
-    chunked_list.append(header)
+    chunked_list.append(headers)
     chunked_list = chunked_list[::-1]
     hh_table_instance = AsciiTable(chunked_list, title)
     return hh_table_instance.table
@@ -141,10 +137,14 @@ def process_statistics(collected_stats, title):
 def main():
     load_dotenv()
     sj_api_app_id = os.environ.get("SJ_API_ID")
+    langauages_for_vacancies = ["Python", "JavaScript", "Ruby", "Java",
+                                "PHP", "C++", "Go", "Swift"]
     date_from, date_to = count_date_from_to()
-    collected_hh_stats = collect_vacancy_stats_hh(date_from, date_to)
+    collected_hh_stats = collect_vacancy_stats_hh(date_from, date_to,
+                                                  langauages_for_vacancies)
     collected_sj_stats = collect_vacancy_stats_sj(date_from, date_to,
-                                                  sj_api_app_id)
+                                                  sj_api_app_id,
+                                                  langauages_for_vacancies)
     title_hh = 'Head Hunter Moscow'
     title_sj = 'Super job Moscow'
     print(process_statistics(collected_hh_stats, title_hh))
