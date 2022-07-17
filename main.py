@@ -23,6 +23,7 @@ def get_hh_page(date_from, date_to, page, vacancy):
         "page": page,
         "per_page": 100,
         "describe_arguments": True,
+        "area.id": "1",
     }
     response = requests.get(hh_url, params=params)
     response.raise_for_status()
@@ -61,7 +62,7 @@ def predict_salary(salary_from, salary_to):
 def collect_vacancy_stats_hh(date_from, date_to, languages):
     vacancy_statistics = dict()
     vacancies_limit = 2000
-    per_page = 20
+    per_page = 100
     stop_page = vacancies_limit/per_page - 1
     for language in languages:
         salaries = []
@@ -76,7 +77,9 @@ def collect_vacancy_stats_hh(date_from, date_to, languages):
                 if item['salary'] and item['salary']['currency'] == 'RUR':
                     salaries.append(predict_salary(item['salary']['from'],
                                                    item['salary']['to']))
-            if page >= stop_page:
+            if page >= hh_vacancies_response["found"]//per_page:
+                break
+            elif page >= stop_page:
                 break
         try:
             found_statistics["average_salary"] = int(
